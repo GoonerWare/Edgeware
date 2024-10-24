@@ -1,7 +1,7 @@
 # Edgeware
 **First and foremost as a disclaimer: this is NOT actually malicious software. It is intended for entertainment purposes only. Any and all damage caused to your files or computer is _YOUR_ responsibility. If you're worried about losing things, BACK THEM UP.**
 
-**Please Note:** This is a fork of the [original Edgeware project](https://github.com/PetitTournesol/Edgeware) which has not been updated since 2022. Versions 2.5.0 Beta and above are provided by this fork.
+**Please Note:** - This is a fork of the [original Edgeware project](https://github.com/PetitTournesol/Edgeware) which has not been updated since 2022. Versions 2.5.0 Beta and above are provided by this fork.
 
 If you get error "TypeError: unsupported operand type(s) for |: 'type' and 'type'", please make sure your Python is up to date! This fork is being developed on Python 3.12.x (at time of writing, 3.12.7)
 
@@ -17,19 +17,19 @@ Current version:
 
 2.5.0 Beta Update *WIP version - will be updated*
 
-•**Python Update** *Updated Python installed by default to 3.12.7*
+• **Python Update** - *Updated Python installed by default to 3.12.7*
 
-•**Popups & Start Screen** *Changed resize method from ANTIALIAS to LANCZOS*
+• **Popups & Start Screen** - *Changed resize method from ANTIALIAS to LANCZOS*
 
-•**Discord Presence** *Fixed issue with default packs, adds fallbacks*
+• **Discord Presence** - *Fixed issue with default packs, adds fallbacks*
 
-•**Display Changes** *Switches monitor handling to use screeninfo. Can optionally set Popups to only display on primary monitor*
+• **Display Changes** - *Switches monitor handling to use screeninfo. Can optionally set Popups to only display on primary monitor*
 
-•**Video Changes** *Optionally enables video playback via VLC for improved performance*
+• **Video Changes** - *Optionally enables video playback via VLC for improved performance*
 
-•**GIF Changes** *Now handles static GIFs as images instead of logging error*
+• **GIF Changes** - *Now handles static GIFs as images instead of logging error*
 
-**Notes** For the moment multi-monitor and VLC settings can be set via the Advanced tab. To enable VLC support make sure it's installed and set vlcMode to 1. To make Edgeware only display popups on your primary monitor, set multiMonitor to 0
+**Important:** *For the moment multi-monitor and VLC settings can be set via the Advanced tab. To enable VLC support make sure it's installed and set `vlcMode` to 1. To make Edgeware only display popups on your primary monitor, set `multiMonitor` to 0*
 
 The full release notes for past versions can be found [here](https://github.com/GoonerWare/Edgeware/blob/main/RELEASENOTES.md).
 
