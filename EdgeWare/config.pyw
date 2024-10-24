@@ -1798,7 +1798,7 @@ def shortcut_script(pth_str: str, startup_path: str, title: str):
 
 # uses the above script to create a shortcut on desktop with given specs
 def make_shortcut(tList: list) -> bool:
-    with open(PATH + "\\tmp.bat", "w") as bat:
+    with open(PATH + "\\tmp.bat", "w", encoding="utf-8") as bat:
         bat.writelines(
             shortcut_script(tList[0], tList[1], tList[2])
         )  # write built shortcut script text to temporary batch file

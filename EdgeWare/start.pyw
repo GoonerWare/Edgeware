@@ -49,7 +49,7 @@ def load_settings():
     settings = {}
 
     # creating objects to check vs live config for version updates
-    with open(PATH + "\\configDefault.dat") as r:
+    with open(PATH + "\\configDefault.dat", encoding="utf-8") as r:
         logging.info("reading in default config values")
         defaultLines = r.readlines()
         default_setting_keys = defaultLines[0].split(",")
@@ -312,7 +312,7 @@ def shortcut_script(pth_str: str, keyword: str, script: str, title: str):
 
 # uses the above script to create a shortcut on desktop with given specs
 def make_shortcut(tList: list) -> bool:
-    with open(PATH + "\\tmp.bat", "w") as bat:
+    with open(PATH + "\\tmp.bat", "w", encoding="utf-8") as bat:
         bat.writelines(
             tList
         )  # write built shortcut script text to temporary batch file
@@ -407,7 +407,7 @@ if os.path.exists(PATH + "\\resource\\web.json"):
 
 WEB_DICT = {}
 if os.path.exists(PATH + "\\resource\\web.json"):
-    with open(PATH + "\\resource\\web.json", "r") as webF:
+    with open(PATH + "\\resource\\web.json", "r", encoding="utf-8") as webF:
         WEB_DICT = json.loads(webF.read())
 
 try:

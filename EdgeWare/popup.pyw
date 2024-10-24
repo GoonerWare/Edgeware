@@ -59,7 +59,7 @@ DENIAL_MODE = False
 DENIAL_CHANCE = 0
 SUBLIMINAL_MODE = False
 
-with open(PATH + "\\config.cfg", "r") as cfg:
+with open(PATH + "\\config.cfg", "r", encoding="utf-8") as cfg:
     settings = json.loads(cfg.read())
     SHOW_CAPTIONS = check_setting("showCaptions")
     PANIC_DISABLED = check_setting("panicDisabled")
@@ -116,11 +116,11 @@ if PANIC_REQUIRES_VALIDATION:
 if WEB_OPEN:
     web_dict = ""
     if os.path.exists(PATH + "\\resource\\web.json"):
-        with open(PATH + "\\resource\\web.json", "r") as web_file:
+        with open(PATH + "\\resource\\web.json", "r", encoding="utf-8") as web_file:
             web_dict = json.loads(web_file.read())
 
 try:
-    with open(PATH + "\\resource\\CAPTIONS.json", "r") as caption_file:
+    with open(PATH + "\\resource\\CAPTIONS.json", "r", encoding="utf-8") as caption_file:
         CAPTIONS = json.loads(caption_file.read())
         try:
             SUBMISSION_TEXT = CAPTIONS["subtext"]

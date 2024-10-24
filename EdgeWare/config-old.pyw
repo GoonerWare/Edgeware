@@ -5,7 +5,7 @@ import os
 
 PATH = os.path.abspath(os.getcwd())
 
-with open(PATH + "\\configDefault.dat") as r:
+with open(PATH + "\\configDefault.dat", encoding="utf-8") as r:
     obj = r.readlines()
     varNames = obj[0].split(",")
     varNames[len(varNames) - 1] = varNames[len(varNames) - 1].replace("\n", "")
@@ -16,10 +16,10 @@ for var in varNames:
     settingJsonObj[var] = defaultVars[varNames.index(var)]
 
 if not os.path.exists(PATH + "\\config.cfg"):
-    with open(PATH + "\\config.cfg", "w") as f:
+    with open(PATH + "\\config.cfg", "w", encoding="utf-8") as f:
         f.write(json.dumps(settingJsonObj))
 
-with open(PATH + "\\config.cfg", "r") as f:
+with open(PATH + "\\config.cfg", "r", encoding="utf-8") as f:
     settingJsonObj = json.loads(f.readline())
 
 if settingJsonObj["version"] != defaultVars[0]:
@@ -31,7 +31,7 @@ if settingJsonObj["version"] != defaultVars[0]:
             jsonObj[obj] = defaultVars[varNames.index(obj)]
     jsonObj["version"] = defaultVars[0]
     settingJsonObj = jsonObj
-    with open(PATH + "\\config.cfg", "w") as f:
+    with open(PATH + "\\config.cfg", "w", encoding="utf-8") as f:
         f.write(str(jsonObj).replace("'", '"'))
 
 root = tk.Tk()

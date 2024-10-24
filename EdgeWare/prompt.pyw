@@ -15,12 +15,12 @@ command_text = "Type for me, slut~"
 PATH = str(pathlib.Path(__file__).parent.absolute())
 os.chdir(PATH)
 
-with open(PATH + "\\config.cfg") as settings:
+with open(PATH + "\\config.cfg", encoding="utf-8") as settings:
     maxMistakes = int(json.loads(settings.read())["promptMistakes"])
 
 if os.path.exists(PATH + "\\resource\\prompt.json"):
     hasData = True
-    with open(PATH + "\\resource\\prompt.json", "r") as f:
+    with open(PATH + "\\resource\\prompt.json", "r", encoding="utf-8") as f:
         textData = json.loads(f.read())
         try:
             submission_text = textData["subtext"]
