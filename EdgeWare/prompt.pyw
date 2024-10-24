@@ -5,6 +5,7 @@ import random as rand
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import *
+from screeninfo import get_monitors
 
 hasData = False
 textData = {}
@@ -42,13 +43,14 @@ def unborderedWindow():
     
     txt = buildText()
 
-    wid = root.winfo_screenwidth() / 4
-    hgt = root.winfo_screenheight() / 2
+    monitor = next(m for m in get_monitors() if m.is_primary)
+    wid = monitor.width / 4
+    hgt = monitor.height / 2
 
     textLabel = Label(root, text=txt, wraplength=wid)
     textLabel.pack()
 
-    root.geometry('%dx%d+%d+%d' % (wid, hgt, 2*wid - wid / 2, hgt - hgt / 2))
+    root.geometry('%dx%d+%d+%d' % (wid, hgt, monitor.x + 2*wid - wid / 2, monitor.y + hgt - hgt / 2))
 
     root.overrideredirect(1)
     root.frame = Frame(root, borderwidth=2, relief=RAISED)

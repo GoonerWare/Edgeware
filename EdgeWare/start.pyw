@@ -189,6 +189,12 @@ except:
     pip_install('bs4')
     from bs4 import BeautifulSoup
 
+try:
+    import screeninfo
+except:
+    logging.warning('failed to import screeninfo module')
+    pip_install('screeninfo')
+
 #end non-standard imports
 
 DESKTOP_PATH = os.path.join(os.environ['USERPROFILE'], 'Desktop') #desktop path for making shortcuts

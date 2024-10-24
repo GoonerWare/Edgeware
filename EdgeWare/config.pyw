@@ -67,7 +67,7 @@ BOORU_VIEW = f'https://{BOORU_FLAG}.booru.org/index.php?page=post&s=view&id='   
 BOORU_PTAG = '&pid='                                                               #page id tag
 
 #url to check online version
-UPDCHECK_URL = 'http://raw.githubusercontent.com/PetitTournesol/Edgeware/main/EdgeWare/configDefault.dat'
+UPDCHECK_URL = 'http://raw.githubusercontent.com/GoonerWare/Edgeware/main/EdgeWare/configDefault.dat'
 local_version = '0.0.0_NOCONNECT'
 
 logging.info('opening configDefault')

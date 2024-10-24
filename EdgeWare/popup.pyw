@@ -13,60 +13,10 @@ import logging
 from tkinter import messagebox, simpledialog, Tk, Frame, Label, Button, RAISED
 from itertools import count, cycle
 from PIL import Image, ImageTk, ImageFilter
+from screeninfo import get_monitors
 
 SYS_ARGS = sys.argv.copy()
 SYS_ARGS.pop(0)
-
-#Start Imported Code
-#Code from: https://code.activestate.com/recipes/460509-get-the-actual-and-usable-sizes-of-all-the-monitor/
-user = ctypes.windll.user32
-
-class RECT(ctypes.Structure): #rect class for containing monitor info
-    _fields_ = [
-        ('left', ctypes.c_long),
-        ('top', ctypes.c_long),
-        ('right', ctypes.c_long),
-        ('bottom', ctypes.c_long)
-        ]
-    def dump(self):
-        return map(int, (self.left, self.top, self.right, self.bottom))
-
-class MONITORINFO(ctypes.Structure): #unneeded for this, but i don't want to rework the entire thing because i'm stupid
-    _fields_ = [
-        ('cbSize', ctypes.c_ulong),
-        ('rcMonitor', RECT),
-        ('rcWork', RECT),
-        ('dwFlags', ctypes.c_ulong)
-        ]
-
-def get_monitors():
-    retval = []
-    CBFUNC = ctypes.WINFUNCTYPE(ctypes.c_int, ctypes.c_ulong, ctypes.c_ulong, ctypes.POINTER(RECT), ctypes.c_double)
-    def cb(hMonitor, hdcMonitor, lprcMonitor, dwData):
-        r = lprcMonitor.contents
-        data = [hMonitor]
-        data.append(r.dump())
-        retval.append(data)
-        return 1
-    cbfunc = CBFUNC(cb)
-    temp = user.EnumDisplayMonitors(0, 0, cbfunc, 0)
-    return retval
-
-def monitor_areas(): #all that matters from this is list(mapObj[monitor index][1])[k]; this is the list of monitor dimensions
-    retval = []
-    monitors = get_monitors()
-    for hMonitor, extents in monitors:
-        data = [hMonitor]
-        mi = MONITORINFO()
-        mi.cbSize = ctypes.sizeof(MONITORINFO)
-        mi.rcMonitor = RECT()
-        mi.rcWork = RECT()
-        res = user.GetMonitorInfoA(hMonitor, ctypes.byref(mi))
-        data.append(mi.rcMonitor.dump())
-        data.append(mi.rcWork.dump())
-        retval.append(data)
-    return retval
-#End Imported Code
 
 #used to check passed tags for script mode
 def checkTag(tag) -> bool:
@@ -239,7 +189,6 @@ class VideoLabel(tk.Label):
                 self.time_offset_end = time.perf_counter()
                 time.sleep(max(0, self.delay - (self.time_offset_end - self.time_offset_start)))
 
-
 def run():
     #var things
     arr = os.listdir(f'{os.path.abspath(os.getcwd())}\\resource\\img\\')
@@ -268,11 +217,8 @@ def run():
 
     gif_bool = item.split('.')[-1].lower() == 'gif'
     border_wid_const = 5
-    monitor_data = monitor_areas()
-
-    data_list = list(monitor_data[rand.randrange(0, len(monitor_data))][2])
-    screen_width = data_list[2] - data_list[0]
-    screen_height = data_list[3] - data_list[1]
+    monitor = next(m for m in get_monitors() if m.is_primary)
+    #TODO - Add toggle for primary only (above) or all monitors: rand.choice(get_monitors())
 
     #window start
     root = Tk()
@@ -284,10 +230,10 @@ def run():
 
     #many thanks to @MercyNudes for fixing my old braindead scaling method (https://twitter.com/MercyNudes)
     def resize(img:Image.Image) -> Image.Image:
-        size_source = max(img.width, img.height) / min(screen_width, screen_height)
+        size_source = max(img.width, img.height) / min(monitor.width, monitor.height)
         size_target = rand.randint(30, 70) / 100 if not LOWKEY_MODE else rand.randint(20, 50) / 100
         resize_factor = size_target / size_source
-        return image.resize((int(image.width * resize_factor), int(image.height * resize_factor)), Image.ANTIALIAS)
+        return image.resize((int(image.width * resize_factor), int(image.height * resize_factor)), Image.LANCZOS)
 
     resized_image = resize(image)
 
@@ -343,25 +289,25 @@ def run():
             denyLabel.place(x=int(resized_image.width / 2) - int(denyLabel.winfo_reqwidth() / 2),
                             y=int(resized_image.height / 2) - int(denyLabel.winfo_reqheight() / 2))
 
-    locX = rand.randint(data_list[0], data_list[2] - (resized_image.width))
-    locY = rand.randint(data_list[1], max(data_list[3] - (resized_image.height), 0))
+    locX = rand.randint(monitor.x, monitor.x + monitor.width - (resized_image.width))
+    locY = rand.randint(monitor.y, max(monitor.y + monitor.height - (resized_image.height), 0))
 
     if LOWKEY_MODE:
         global LOWKEY_CORNER
         if LOWKEY_CORNER == 4:
             LOWKEY_CORNER = rand.randrange(0, 3)
         if LOWKEY_CORNER == 0:
-            locX = data_list[2] - (resized_image.width)
-            locY = 0
+            locX = monitor.width - (resized_image.width)
+            locY = monitor.y
         elif LOWKEY_CORNER == 1:
-            locX = 0
-            locY = 0
+            locX = monitor.x
+            locY = monitor.y
         elif LOWKEY_CORNER == 2:
-            locX = 0
-            locY = data_list[3] - (resized_image.height)
+            locX = monitor.x
+            locY = monitor.height - (resized_image.height)
         elif LOWKEY_CORNER == 3:
-            locX = data_list[2] - (resized_image.width)
-            locY = data_list[3] - (resized_image.height)
+            locX = monitor.x + monitor.width - (resized_image.width)
+            locY = monitor.y + monitor.height - (resized_image.height)
 
     root.geometry(f'{resized_image.width + border_wid_const - 1}x{resized_image.height + border_wid_const - 1}+{locX}+{locY}')
     
