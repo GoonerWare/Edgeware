@@ -222,6 +222,12 @@ except:
     logging.warning("failed to import screeninfo module")
     pip_install("screeninfo")
 
+try:
+    import vlc
+except:
+    logging.warning("failed to import vlc module")
+    pip_install("python-vlc")
+
 # end non-standard imports
 
 DESKTOP_PATH = os.path.join(
@@ -287,7 +293,6 @@ LOWKEY_MODE = int(settings["lkToggle"]) == 1
 TIMER_MODE = int(settings["timerMode"]) == 1
 
 DRIVE_PATH = settings["drivePath"]
-
 
 def shortcut_script(pth_str: str, keyword: str, script: str, title: str):
     # strings for batch script to write vbs script to create shortcut on desktop

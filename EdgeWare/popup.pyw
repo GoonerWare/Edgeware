@@ -58,6 +58,7 @@ FADE_OUT_TIME = 1.5
 DENIAL_MODE = False
 DENIAL_CHANCE = 0
 SUBLIMINAL_MODE = False
+VLC_MODE = False
 
 with open(PATH + "\\config.cfg", "r", encoding="utf-8") as cfg:
     settings = json.loads(cfg.read())
@@ -82,6 +83,8 @@ with open(PATH + "\\config.cfg", "r", encoding="utf-8") as cfg:
     DENIAL_MODE = check_setting("denialMode")
     DENIAL_CHANCE = int(settings["denialChance"])
     SUBLIMINAL_MODE = check_setting("popupSubliminals")
+
+    VLC_MODE = check_setting("vlcMode")
 
 # functions for script mode, unused for now
 if checkTag("timeout="):
@@ -204,31 +207,43 @@ class VideoLabel(tk.Label):
         self.delay = 1 / self.fps
 
     def play(self):
-        from types import NoneType
+        if VLC_MODE:
+            import vlc
+            self.config(height=self.hgt, width=self.wid)
+            self.instance = vlc.Instance('--input-repeat=999999')
+            self.player = self.instance.media_player_new()
+            media = self.instance.media_new(self.path)
+            media.get_mrl()
+            self.player.set_media(media)
+            self.player.set_hwnd(self.winfo_id())
+            self.player.audio_set_volume(int(VIDEO_VOLUME*100))
+            self.player.play()
+        else:
+            from types import NoneType
 
-        if not isinstance(self.audio_track, NoneType):
-            try:
-                import sounddevice
+            if not isinstance(self.audio_track, NoneType):
+                try:
+                    import sounddevice
 
-                sounddevice.play(
-                    self.audio_track,
-                    samplerate=len(self.audio_track) / self.duration,
-                    loop=True,
-                )
-            except Exception as e:
-                print(f"failed to play sound, reason:\n\t{e}")
-        while True:
-            for frame in self.video_frames.iter_data():
-                self.time_offset_start = time.perf_counter()
-                self.video_frame_image = ImageTk.PhotoImage(
-                    Image.fromarray(frame).resize((self.wid, self.hgt))
-                )
-                self.config(image=self.video_frame_image)
-                self.image = self.video_frame_image
-                self.time_offset_end = time.perf_counter()
-                time.sleep(
-                    max(0, self.delay - (self.time_offset_end - self.time_offset_start))
-                )
+                    sounddevice.play(
+                        self.audio_track,
+                        samplerate=len(self.audio_track) / self.duration,
+                        loop=True,
+                    )
+                except Exception as e:
+                    print(f"failed to play sound, reason:\n\t{e}")
+            while True:
+                for frame in self.video_frames.iter_data():
+                    self.time_offset_start = time.perf_counter()
+                    self.video_frame_image = ImageTk.PhotoImage(
+                        Image.fromarray(frame).resize((self.wid, self.hgt))
+                    )
+                    self.config(image=self.video_frame_image)
+                    self.image = self.video_frame_image
+                    self.time_offset_end = time.perf_counter()
+                    time.sleep(
+                        max(0, self.delay - (self.time_offset_end - self.time_offset_start))
+                    )
 
 
 def run():
