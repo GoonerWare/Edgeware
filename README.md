@@ -7,9 +7,7 @@ If you get error "TypeError: unsupported operand type(s) for |: 'type' and 'type
 
 _**[Maintainer's Note]**_
 
-Hello! EdgewarePlusPlus is great, but has diverged enough from the original Edgeware following the rewrite that it should now be considered its own thing IMO. As great at it is, there are also some changes I am not a fan of and some outstanding bugs for things that I consider core functionality.
-
-The initial idea behind this fork is to update the original Edgeware project so that it supports modern versions of Python out of the box. Improved functionality that doesn't change the core design of the original Edgeware may also be brought in. It may diverge from that over time, but I am not currently looking to take feature requests etc.
+Hello! EdgewarePlusPlus is great, but has diverged enough from the original Edgeware following the rewrite that it should now be considered its own thing IMO. The initial idea behind this fork is to update the original Edgeware project so that it supports modern versions of Python out of the box. Improved functionality that doesn't change the core design will also be brought in (e.g. supporting multiple OS).
 
 _**[Release Notes]**_
 
@@ -17,19 +15,16 @@ Current version:
 
 2.5.0 Beta Update *WIP version - will be updated*
 
-•**Python Update** *Updated Python installed by default to 3.12.7*
+- **Python Update** - *Updated Python installed by default to 3.12.7*
+- **Popups & Start Screen** - *Changed resize method from ANTIALIAS to LANCZOS*
+- **Discord Presence** - *Fixed issue with default packs, adds fallbacks*
+- **Display Changes** - *Switches monitor handling to use screeninfo. Can optionally set Popups to only display on primary monitor*
+- **Video Changes** - *Optionally enables video playback via VLC for improved performance*
+- **GIF Changes** - *Now handles static GIFs as images instead of logging error*
 
-•**Popups & Start Screen** *Changed resize method from ANTIALIAS to LANCZOS*
-
-•**Discord Presence** *Fixed issue with default packs, adds fallbacks*
-
-•**Display Changes** *Switches monitor handling to use screeninfo. Can optionally set Popups to only display on primary monitor*
-
-•**Video Changes** *Optionally enables video playback via VLC for improved performance*
-
-•**GIF Changes** *Now handles static GIFs as images instead of logging error*
-
-**Notes** For the moment multi-monitor and VLC settings can be set via the Advanced tab. To enable VLC support make sure it's installed and set vlcMode to 1. To make Edgeware only display popups on your primary monitor, set multiMonitor to 0
+**Important:** For the moment multi-monitor and VLC settings can be set via the Advanced tab:
+- To enable VLC support make sure you have the correct version installed (e.g. 64bit for 64bit systems) and set `vlcMode` to 1
+- To make Edgeware only display popups on your primary monitor, set `multiMonitor` to 0
 
 The full release notes for past versions can be found [here](https://github.com/GoonerWare/Edgeware/blob/main/RELEASENOTES.md).
 
