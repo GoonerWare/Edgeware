@@ -23,7 +23,13 @@ Current version:
 
 •**Discord Presence** *Fixed issue with default packs, adds fallbacks*
 
-•**Display Changes** *Switches monitor handling to use screeninfo. Popups and prompts now display only on the primary monitor. A toggle will be added to select between primary only and all monitors in the future*
+•**Display Changes** *Switches monitor handling to use screeninfo. Can optionally set Popups to only display on primary monitor*
+
+•**Video Changes** *Optionally enables video playback via VLC for improved performance*
+
+•**GIF Changes** *Now handles static GIFs as images instead of logging error*
+
+**Notes** For the moment multi-monitor and VLC settings can be set via the Advanced tab. To enable VLC support make sure it's installed and set vlcMode to 1. To make Edgeware only display popups on your primary monitor, set multiMonitor to 0
 
 The full release notes for past versions can be found [here](https://github.com/GoonerWare/Edgeware/blob/main/RELEASENOTES.md).
 

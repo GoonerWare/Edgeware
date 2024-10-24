@@ -59,6 +59,7 @@ DENIAL_MODE = False
 DENIAL_CHANCE = 0
 SUBLIMINAL_MODE = False
 VLC_MODE = False
+MULTI_MONITOR = True
 
 with open(PATH + "\\config.cfg", "r", encoding="utf-8") as cfg:
     settings = json.loads(cfg.read())
@@ -85,6 +86,7 @@ with open(PATH + "\\config.cfg", "r", encoding="utf-8") as cfg:
     SUBLIMINAL_MODE = check_setting("popupSubliminals")
 
     VLC_MODE = check_setting("vlcMode")
+    MULTI_MONITOR = check_setting("multiMonitor")
 
 # functions for script mode, unused for now
 if checkTag("timeout="):
@@ -286,8 +288,11 @@ def run():
             image = image.convert("RGBA")
 
     border_wid_const = 5
-    monitor = next(m for m in get_monitors() if m.is_primary)
-    # TODO - Add toggle for primary only (above) or all monitors: rand.choice(get_monitors())
+
+    if MULTI_MONITOR:
+        monitor = rand.choice(get_monitors())
+    else:
+        monitor = next(m for m in get_monitors() if m.is_primary)
 
     # window start
     root = Tk()
