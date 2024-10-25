@@ -26,7 +26,13 @@ def create_shortcut_script(pth_str: str, startup_path: str, title: str):
 
 
 # uses the above script to create a shortcut on desktop with given specs
-def make_shortcut(tList: list) -> bool:
+def make_shortcut(
+    path: Path,
+    icon: str,
+    script: str,
+    title: str | None = None,
+    startup_path: str | None = None,
+) -> bool:
     print("Linux: Need to implement make_shortcut")
     pass
 

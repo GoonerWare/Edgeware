@@ -139,13 +139,11 @@ if int(settings.get("pip_installed")) != 1:
         subprocess.check_output("pip")
     except:
         try:
+            logging.info("pip not found, trying py -m pip")
             subprocess.check_output([sys.executable, "-m", "pip"])
         except:
-            logging.warning("pip is not installed, running get-pip.pyw")
-            subprocess.run([sys.executable, "get-pip.pyw"])
-            logging.warning(
-                "pip should be installed, but issues will occur if installation failed."
-            )
+            logging.critical("pip is not installed, unable to proceed")
+            exit()
 
     settings["pip_installed"] = 1
     CONFIG_FILE.write_text(json.dumps(settings), "UTF-8")
@@ -154,7 +152,7 @@ if int(settings.get("pip_installed")) != 1:
 def pip_install(packageName: str):
     try:
         logging.info(f"attempting to install {packageName}")
-        subprocess.run([sys.executable, "py" "-m", "install", packageName])
+        subprocess.run([sys.executable, "-m", "pip", "install", packageName])
     except:
         logging.warning(
             f"failed to install {packageName} using py -m pip, trying raw pip request"
@@ -200,7 +198,7 @@ except:
     pip_install("playsound==1.2.2")
     import playsound
 
-if not utils.DEPENDENCIES.FFMPEG in missing_dependencies:
+if not utilities.DEPENDENCIES.FFMPEG in missing_dependencies:
     try:
         import videoprops
     except:
@@ -219,7 +217,7 @@ except:
     logging.warning("failed to import moviepy module")
     pip_install("moviepy")
 
-if not utils.DEPENDENCIES.PORT_AUDIO in missing_dependencies:
+if not utilities.DEPENDENCIES.PORT_AUDIO in missing_dependencies:
     try:
         import sounddevice
     except:
@@ -465,6 +463,7 @@ def url_select(arg: int) -> str | None:
 # class to handle window for tray icon
 class TrayHandler:
     def __init__(self):
+        import pystray
         self.root = tk.Tk()
         self.root.title("Edgeware")
         self.timer_mode = settings["timerMode"] == 1
@@ -924,6 +923,8 @@ def do_timer():
 def play_audio():
     global PLAYING_AUDIO
 
+    print(AUDIO)
+    pass
     if not AUDIO:
         return
 

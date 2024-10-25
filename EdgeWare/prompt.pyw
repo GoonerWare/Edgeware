@@ -1,10 +1,11 @@
+import json
 import os
 import pathlib
-import json
 import random as rand
 import tkinter as tk
-from tkinter import messagebox
+import utilities
 from tkinter import *
+from tkinter import messagebox
 from screeninfo import get_monitors
 
 hasData = False
@@ -12,24 +13,26 @@ textData = {}
 maxMistakes = 3
 submission_text = "I Submit <3"
 command_text = "Type for me, slut~"
-PATH = str(pathlib.Path(__file__).parent.absolute())
+
+PATH = pathlib.Path(__file__).parent
 os.chdir(PATH)
 
-with open(PATH + "\\config.cfg", encoding="utf-8") as settings:
-    maxMistakes = int(json.loads(settings.read())["promptMistakes"])
+CONFIG_FILE = PATH / "config.cfg"
 
-if os.path.exists(PATH + "\\resource\\prompt.json"):
+maxMistakes = int(json.loads(CONFIG_FILE.read_text())["promptMistakes"])
+
+PROMPT_FILE = PATH / "resource" / "prompt.json"
+if PROMPT_FILE.exists():
     hasData = True
-    with open(PATH + "\\resource\\prompt.json", "r", encoding="utf-8") as f:
-        textData = json.loads(f.read())
-        try:
-            submission_text = textData["subtext"]
-        except:
-            print("no subtext")
-        try:
-            command_text = textData["commandtext"]
-        except:
-            print("no commandtext")
+    textData = json.loads(PROMPT_FILE.read_text("UTF-8"))
+    try:
+        submission_text = textData["subtext"]
+    except:
+        print("no subtext")
+    try:
+        command_text = textData["commandtext"]
+    except:
+        print("no commandtext")
 
 if not hasData:
     messagebox.showerror(
@@ -59,7 +62,9 @@ def unborderedWindow():
         % (wid, hgt, monitor.x + 2 * wid - wid / 2, monitor.y + hgt - hgt / 2)
     )
 
-    root.overrideredirect(1)
+    if utilities.is_windows():
+        root.overrideredirect(True)
+
     root.frame = Frame(root, borderwidth=2, relief=RAISED)
     root.frame.pack_propagate(True)
     root.wm_attributes("-topmost", 1)

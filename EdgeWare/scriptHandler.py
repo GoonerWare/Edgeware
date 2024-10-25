@@ -1,11 +1,11 @@
 import os
-import time
-import winsound
-import threading as thread
-import sys
 import random as rand
+import sys
+import threading as thread
+import time
 import webbrowser
-from tkinter import Tk, Label, Frame, Button
+import winsound
+from tkinter import Button, Frame, Label, Tk
 
 SYS_ARGS = sys.argv
 
