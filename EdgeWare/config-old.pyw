@@ -1,7 +1,7 @@
-import tkinter as tk
 import json
-from tkinter import *
 import os
+import tkinter as tk
+from tkinter import *
 
 PATH = os.path.abspath(os.getcwd())
 

@@ -1,22 +1,24 @@
-import urllib
-import pathlib
+import ast
 import ctypes
 import hashlib
+import json
+import logging
 import os
+import pathlib
+import random as rand
+import shutil
 import subprocess
-import ast
+import sys
+import threading as thread
 import time
+import tkinter as tk
+import urllib
 import webbrowser
 import zipfile
-import shutil
-import json
-import random as rand
-import threading as thread
-import tkinter as tk
-import logging
-import sys
 from dataclasses import dataclass
+from pathlib import Path
 from tkinter import messagebox, simpledialog
+from utilities import utilities
 
 PATH = str(pathlib.Path(__file__).parent.absolute())
 os.chdir(PATH)

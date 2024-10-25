@@ -1,51 +1,58 @@
+import ast
+import getpass
+import hashlib
 import json
+import logging
 import os
 import shutil
 import subprocess
+import sys
+import time
+import urllib.request
 import webbrowser
 import zipfile
-import pathlib
-import ast
-import urllib.request
-import hashlib
-import ctypes
-import sys
-import logging
-import time
+from pathlib import Path
 from tkinter import (
-    Tk,
-    ttk,
-    simpledialog,
-    messagebox,
-    filedialog,
-    IntVar,
-    BooleanVar,
-    StringVar,
-    Frame,
-    Checkbutton,
-    Button,
-    Scale,
-    Label,
-    Toplevel,
-    Entry,
-    OptionMenu,
-    Listbox,
-    SINGLE,
     DISABLED,
     GROOVE,
     RAISED,
+    SINGLE,
+    BooleanVar,
+    Button,
+    Checkbutton,
+    Entry,
+    Frame,
+    IntVar,
+    Label,
+    Listbox,
+    OptionMenu,
+    Scale,
+    StringVar,
+    Tk,
+    Toplevel,
+    filedialog,
+    messagebox,
+    simpledialog,
+    ttk,
 )
+from utilities import utilities
 
-PATH = f"{str(pathlib.Path(__file__).parent.absolute())}\\"
+OS_COLOUR = "SystemButtonFace" if os.name == "nt" else "gray90"
+
+PATH: Path = Path(__file__).parent
 os.chdir(PATH)
 
 # starting logging
-if not os.path.exists(os.path.join(PATH, "logs")):
-    os.mkdir(os.path.join(PATH, "logs"))
+LOG_DIRECTORY = PATH / "logs"
+if not LOG_DIRECTORY.exists():
+    LOG_DIRECTORY.mkdir(exist_ok=False)
+
+LOG_FILE = (
+    LOG_DIRECTORY / f"{time.asctime().replace(' ', '_').replace(':', '-')}-dbg.txt"
+)
+
 logging.basicConfig(
-    filename=os.path.join(
-        PATH, "logs", time.asctime().replace(" ", "_").replace(":", "-") + "-dbg.txt"
-    ),
+    filename=LOG_FILE,
     format="%(levelname)s:%(message)s",
     level=logging.DEBUG,
 )
@@ -55,12 +62,12 @@ logging.info("Started config logging successfully.")
 def pip_install(packageName: str):
     try:
         logging.info(f"attempting to install {packageName}")
-        subprocess.call(f"py -m pip install {packageName}")
+        subprocess.run([sys.executable, "python" "-m", "install", packageName])
     except:
         logging.warning(
-            f"failed to install {packageName} using py -m pip, trying raw pip request"
+            f"failed to install {packageName} using python -m pip, trying raw pip request"
         )
-        subprocess.call(f"pip install {packageName}")
+        subprocess.run(["pip", "install", packageName])
         logging.warning(
             f"{packageName} should be installed, fatal errors will occur if install failed."
         )
@@ -109,14 +116,16 @@ UPDCHECK_URL = "http://raw.githubusercontent.com/GoonerWare/Edgeware/main/EdgeWa
 local_version = "0.0.0_NOCONNECT"
 
 logging.info("opening configDefault")
-with open(f"{PATH}configDefault.dat") as r:
-    defaultSettingLines = r.readlines()
-    varNames = defaultSettingLines[0].split(",")
-    varNames[-1] = varNames[-1].replace("\n", "")
-    defaultVars = defaultSettingLines[1].split(",")
+default_config_file = PATH / "configDefault.dat"
+defaultSettingLines = default_config_file.read_text("UTF-8").splitlines()
+varNames = defaultSettingLines[0].split(",")
+varNames[-1] = varNames[-1].replace("\n", "")
+defaultVars = defaultSettingLines[1].split(",")
 logging.info(f"done with configDefault\n\tdefault={defaultVars}")
 
 local_version = defaultVars[0]
+
+CONFIG_FILE = PATH / "config.cfg"
 
 settings = {}
 for var in varNames:
@@ -124,24 +133,22 @@ for var in varNames:
 
 defaultSettings = settings.copy()
 
-if not os.path.exists(f"{PATH}config.cfg"):
+if not CONFIG_FILE.exists():
     logging.warning('no "config.cfg" file found, creating new "config.cfg".')
-    with open(f"{PATH}config.cfg", "w") as f:
-        f.write(json.dumps(settings))
+    CONFIG_FILE.write_text(json.dumps(settings), "UTF-8")
     logging.info("created new config file.")
 
-with open(f"{PATH}config.cfg", "r") as f:
-    logging.info("json loading settings")
-    try:
-        settings = json.loads(f.readline())
-    except Exception as e:
-        logging.fatal(f"could not load settings.\n\nReason: {e}")
-        exit()
+logging.info("json loading settings")
+try:
+    settings = json.loads(CONFIG_FILE.read_text("UTF-8"))
+except Exception as e:
+    logging.fatal(f"could not load settings.\n\nReason: {e}")
+    exit()
 
 
 # inserts new settings if versions are literally different
 # or if the count of settings between actual and default is different
-if settings["version"] != defaultVars[0] or len(settings) != len(defaultSettings):
+if settings.get("version") != defaultVars[0] or len(settings) != len(defaultSettings):
     logging.warning(
         "version difference/settingJson len mismatch, regenerating new settings with missing keys..."
     )
@@ -154,14 +161,14 @@ if settings["version"] != defaultVars[0] or len(settings) != len(defaultSettings
             logging.info(f"added missing key: {name}")
     tempSettingDict["version"] = defaultVars[0]
     settings = tempSettingDict.copy()
-    with open(f"{PATH}config.cfg", "w") as f:
-        # bugfix for the config crash issue
-        tempSettingDict["wallpaperDat"] = str(tempSettingDict["wallpaperDat"]).replace(
-            "'", "%^%"
-        )
-        tempSettingString = str(tempSettingDict).replace("'", '"')
-        f.write(tempSettingString.replace("%^%", "'"))
-        logging.info("wrote regenerated settings.")
+
+    # bugfix for the config crash issue
+    tempSettingDict["wallpaperDat"] = str(tempSettingDict["wallpaperDat"]).replace(
+        "'", "%^%"
+    )
+    tempSettingString = str(tempSettingDict).replace("'", '"')
+    CONFIG_FILE.write_text(tempSettingString.replace("%^%", "'"), "UTF-8")
+    logging.info("wrote regenerated settings.")
 
 logging.info("converting wallpaper dict string.")
 DEFAULT_WALLPAPERDAT = {"default": "wallpaper.png"}
@@ -196,7 +203,9 @@ def show_window():
     root.title("Edgeware Config")
     root.geometry("740x675")
     try:
-        root.iconbitmap(f"{PATH}default_assets\\config_icon.ico")
+        img = Image.open(str((PATH / "default_assets" / "config_icon.ico").absolute()))
+        icon = ImageTk.PhotoImage(img)
+        root.iconbitmap(icon)
         logging.info("set iconbitmap.")
     except:
         logging.warning("failed to set iconbitmap.")
@@ -210,7 +219,7 @@ def show_window():
             webVar = IntVar(root, value=int(settings["webMod"]))
             audioVar = IntVar(root, value=int(settings["audioMod"]))
             promptVar = IntVar(root, value=int(settings["promptMod"]))
-            fillVar = BooleanVar(root, value=(settings["fill"] == 1))
+            fillVar = BooleanVar(root, value=(int(settings["fill"]) == 1))
 
             fillDelayVar = IntVar(root, value=int(settings["fill_delay"]))
             replaceVar = BooleanVar(root, value=(settings["replace"] == 1))
@@ -382,19 +391,17 @@ def show_window():
             emergencySettings = {}
             for var in varNames:
                 emergencySettings[var] = defaultVars[varNames.index(var)]
-            with open(f"{PATH}config.cfg", "w") as f:
-                f.write(json.dumps(emergencySettings))
-            with open(f"{PATH}config.cfg", "r") as f:
-                settings = json.loads(f.readline())
+            CONFIG_FILE.write_text(json.dumps(emergencySettings), "UTF-8")
+            settings = json.loads(CONFIG_FILE.read_text("UTF-8"))
             fail_loop += 1
 
     hasWebResourceVar = BooleanVar(
-        root, os.path.exists(os.path.join(PATH, "resource", "webResource.json"))
+        root, (PATH / "resource" / "webResource.json").exists()
     )
 
     # done painful control variables
 
-    if getPresets() is None:
+    if not getPresets():
         write_save(in_var_group, in_var_names, "", False)
         savePreset("Default")
 
@@ -685,7 +692,7 @@ def show_window():
     web_verLabel = Label(
         verFrame,
         text=f"GitHub Version:\n{webv}",
-        bg=("SystemButtonFace" if (defaultVars[0] == webv) else "red"),
+        bg=(OS_COLOUR if (defaultVars[0] == webv) else "red"),
     )
     openGitButton = Button(
         zipGitFrame,
@@ -833,7 +840,7 @@ def show_window():
         command=lambda: getKeyboardInput(setPanicButtonButton, panicButtonVar),
     )
     doPanicButton = Button(
-        panicFrame, text="Perform Panic", command=lambda: os.startfile("panic.pyw")
+        panicFrame, text="Perform Panic", command=lambda: utilities.run_panic_script()
     )
     panicDisableButton = Checkbutton(
         popupHostFrame, text="Disable Panic Hotkey", variable=panicVar
@@ -1422,18 +1429,16 @@ def show_window():
     tabInfoExpound.pack(expand=1, fill="both")
     saveExitButton.pack(fill="x")
 
-    timeObjPath = os.path.join(PATH, "hid_time.dat")
-    HIDDEN_ATTR = 0x02
-    SHOWN_ATTR = 0x08
-    ctypes.windll.kernel32.SetFileAttributesW(timeObjPath, SHOWN_ATTR)
-    if os.path.exists(timeObjPath):
-        with open(timeObjPath, "r") as file:
-            time_ = int(file.readline()) / 60
-            if not time_ == int(settings["timerSetupTime"]):
-                timerToggle.configure(state=DISABLED)
-                for item in timer_group:
-                    item.configure(state=DISABLED)
-    ctypes.windll.kernel32.SetFileAttributesW(timeObjPath, HIDDEN_ATTR)
+    timeObjPath = PATH / "hid_time.dat"
+
+    utilities.expose_file(timeObjPath)
+    if timeObjPath.exists():
+        time_ = int(timeObjPath.read_text("UTF-8")) / 60
+        if not time_ == int(settings["timerSetupTime"]):
+            timerToggle.configure(state=DISABLED)
+            for item in timer_group:
+                item.configure(state=DISABLED)
+    utilities.hide_file(timeObjPath)
 
     # first time alert popup
     # if not settings['is_configed'] == 1:
@@ -1453,12 +1458,9 @@ def show_window():
 
 def pickZip() -> str:
     # selecting zip
-    for dirListObject in os.listdir(f"{PATH}\\"):
-        try:
-            if dirListObject.split(".")[-1].lower() == "zip":
-                return dirListObject.split(".")[0]
-        except:
-            print("{} is not a zip file.".format(dirListObject))
+    for dirListObject in PATH.glob("*.zip"):
+        logging.info(f"found zip file {dirListObject}")
+        return str(dirListObject.absolute())
     return "[No Zip Found]"
 
 
@@ -1470,18 +1472,19 @@ def exportResource() -> bool:
             saveLocation.name, "w", compression=zipfile.ZIP_DEFLATED
         ) as zip:
             beyondRoot = False
-            for root, dirs, files in os.walk(os.path.join(PATH, "resource")):
+            for root, dirs, files in os.walk(PATH / "resource"):
+                root = Path(root)
                 for file in files:
                     logging.info(f"write {file}")
                     if beyondRoot:
                         zip.write(
-                            os.path.join(root, file), root.split("\\")[-1] + f"\\{file}"
+                            (root / file).absolute(), root.split("\\")[-1] + f"\\{file}"
                         )
                     else:
-                        zip.write(os.path.join(root, file), f"\\{file}")
+                        zip.write(root / file, f"{file}")
                 for dir in dirs:
                     logging.info(f"make dir {dir}")
-                    zip.write(os.path.join(root, dir), f"\\{dir}\\")
+                    zip.write(root / dir, f"{dir}")
                 beyondRoot = True
         return True
     except Exception as e:
@@ -1495,7 +1498,7 @@ def importResource(parent: Tk) -> bool:
         openLocation = filedialog.askopenfile("r", defaultextension=".zip")
         if openLocation == None:
             return False
-        if os.path.exists(f"{PATH}resource\\"):
+        if (PATH / "resource").exists():
             resp = confirmBox(
                 parent,
                 "Current resource folder will be deleted and overwritten. Is this okay?",
@@ -1503,10 +1506,10 @@ def importResource(parent: Tk) -> bool:
             if not resp:
                 logging.info("exited import resource overwrite")
                 return False
-            shutil.rmtree(f"{PATH}resource\\")
+            shutil.rmtree(PATH / "resource")
             logging.info("removed old resource folder")
         with zipfile.ZipFile(openLocation.name, "r") as zip:
-            zip.extractall(f"{PATH}resource\\")
+            zip.extractall(PATH / "resource")
             logging.info("extracted all from zip")
         messagebox.showinfo("Done", "Resource importing completed.")
         return True
@@ -1528,7 +1531,8 @@ def confirmBox(parent: Tk, message: str) -> bool:
 
     root.geometry("220x120")
     root.resizable(False, False)
-    root.wm_attributes("-toolwindow", 1)
+    if utilities.is_windows():
+        root.wm_attributes("-toolwindow", 1)
     root.focus_force()
     root.title("Confirm")
     Label(root, text=message, wraplength=212).pack(fill="x")
@@ -1539,7 +1543,7 @@ def confirmBox(parent: Tk, message: str) -> bool:
     try:
         root.destroy()
     except:
-        False
+        pass
     return allow
 
 
@@ -1557,20 +1561,23 @@ def write_save(
     settings["wallpaperDat"] = str(settings["wallpaperDat"])
     settings["wallpaperDat"] = f'{settings["wallpaperDat"]}'
     settings["is_configed"] = 1
+    CONFIG_FILE.write_text(json.dumps(settings), "UTF-8")
 
-    toggleStartupBat(varList[nameList.index("start_on_logon")].get())
+    utilities.toggle_start_on_logon(
+        PATH, varList[nameList.index("start_on_logon")].get()
+    )
 
     SHOWN_ATTR = 0x08
     HIDDEN_ATTR = 0x02
-    hashObjPath = os.path.join(PATH, "pass.hash")
-    timeObjPath = os.path.join(PATH, "hid_time.dat")
+    hashObjPath = PATH / "pass.hash"
+    timeObjPath = PATH / "hid_time.dat"
 
     if int(varList[nameList.index("timerMode")].get()) == 1:
-        toggleStartupBat(True)
+        utilities.toggle_start_on_logon(PATH, True)
 
         # revealing hidden files
-        ctypes.windll.kernel32.SetFileAttributesW(hashObjPath, SHOWN_ATTR)
-        ctypes.windll.kernel32.SetFileAttributesW(timeObjPath, SHOWN_ATTR)
+        utilities.expose_file(hashObjPath)
+        utilities.expose_file(timeObjPath)
         logging.info("revealed hashed pass and time files")
 
         with open(hashObjPath, "w") as passFile, open(timeObjPath, "w") as timeFile:
@@ -1584,24 +1591,24 @@ def write_save(
             logging.info("wrote files.")
 
         # hiding hash file with saved password hash for panic and time data
-        ctypes.windll.kernel32.SetFileAttributesW(hashObjPath, HIDDEN_ATTR)
-        ctypes.windll.kernel32.SetFileAttributesW(timeObjPath, HIDDEN_ATTR)
+        utilities.hide_file(hashObjPath)
+        utilities.hide_file(timeObjPath)
         logging.info("hid hashed pass and time files")
     else:
         try:
             if not varList[nameList.index("start_on_logon")].get():
-                toggleStartupBat(False)
-            ctypes.windll.kernel32.SetFileAttributesW(hashObjPath, SHOWN_ATTR)
-            ctypes.windll.kernel32.SetFileAttributesW(timeObjPath, SHOWN_ATTR)
-            os.remove(hashObjPath)
-            os.remove(timeObjPath)
-            logging.info("removed pass/time files.")
+                utilities.toggle_start_on_logon(PATH, False)
+                utilities.expose_file(hashObjPath)
+                utilities.expose_file(timeObjPath)
+                os.remove(hashObjPath)
+                os.remove(timeObjPath)
+                logging.info("removed pass/time files.")
         except Exception as e:
             errText = (
                 str(e)
                 .lower()
                 .replace(
-                    os.environ["USERPROFILE"].lower().replace("\\", "\\\\"),
+                    getpass.getuser(),
                     "[USERNAME_REDACTED]",
                 )
             )
@@ -1624,12 +1631,11 @@ def write_save(
             except:
                 temp[name] = settings[name]
 
-    with open(f"{PATH}config.cfg", "w") as file:
-        file.write(json.dumps(temp))
-        logging.info(f"wrote config file: {json.dumps(temp)}")
+    CONFIG_FILE.write_text(json.dumps(temp), "UTF-8")
+    logging.info(f"wrote config file: {json.dumps(temp)}")
 
     if int(varList[nameList.index("runOnSaveQuit")].get()) == 1 and exitAtEnd:
-        os.startfile("start.pyw")
+        utilities.run_script("start.pyw")
 
     if exitAtEnd:
         logging.info("exiting config")
@@ -1756,90 +1762,26 @@ def updateText(objList: Entry or Label, var: str, var_Label: str):
 
 
 def refresh():
-    os.startfile("config.pyw")
+    utilities.run_script("config.pyw")
     os.kill(os.getpid(), 9)
 
 
 def assignJSON(key: str, var: int or str):
     settings[key] = var
-    with open(f"{PATH}config.cfg", "w") as f:
-        f.write(json.dumps(settings))
+    CONFIG_FILE.write_text(json.dumps(settings), "UTF-8")
 
 
 def toggleAssociateSettings(ownerState: bool, objList: list):
-    toggleAssociateSettings_manual(ownerState, objList, "SystemButtonFace", "gray25")
+    toggleAssociateSettings_manual(ownerState, objList, OS_COLOUR, "gray25")
 
 
 def toggleAssociateSettings_manual(
-    ownerState: bool, objList: list, colorOn: int, colorOff: int
+    ownerState: bool, objList: list, colorOn: int | str, colorOff: int | str
 ):
     logging.info(f"toggling state of {objList} to {ownerState}")
     for tkObject in objList:
         tkObject.configure(state=("normal" if ownerState else "disabled"))
         tkObject.configure(bg=(colorOn if ownerState else colorOff))
-
-
-def shortcut_script(pth_str: str, startup_path: str, title: str):
-    # strings for batch script to write vbs script to create shortcut on desktop
-    # stupid and confusing? yes. the only way i could find to do this? also yes.
-    print(pth_str)
-    return [
-        "@echo off\n" 'set SCRIPT="%TEMP%\%RANDOM%-%RANDOM%-%RANDOM%-%RANDOM%.vbs"\n',
-        'echo Set oWS = WScript.CreateObject("WScript.Shell") >> %SCRIPT%\n',
-        f'echo sLinkFile = "{startup_path}\\{title}.lnk" >> %SCRIPT%\n',
-        "echo Set oLink = oWS.CreateShortcut(sLinkFile) >> %SCRIPT%\n",
-        f'echo oLink.WorkingDirectory = "{pth_str}\\" >> %SCRIPT%\n',
-        f'echo oLink.TargetPath = "{pth_str}\\start.pyw" >> %SCRIPT%\n',
-        "echo oLink.Save >> %SCRIPT%\n",
-        "cscript /nologo %SCRIPT%\n",
-        "del %SCRIPT%",
-    ]
-
-
-# uses the above script to create a shortcut on desktop with given specs
-def make_shortcut(tList: list) -> bool:
-    with open(PATH + "\\tmp.bat", "w", encoding="utf-8") as bat:
-        bat.writelines(
-            shortcut_script(tList[0], tList[1], tList[2])
-        )  # write built shortcut script text to temporary batch file
-    try:
-        logging.info(f"making shortcut to {tList[2]}")
-        subprocess.call(PATH + "\\tmp.bat")
-        os.remove(PATH + "\\tmp.bat")
-        return True
-    except Exception as e:
-        print("failed")
-        logging.warning(
-            f"failed to call or remove temp batch file for making shortcuts\n\tReason: {e}"
-        )
-        return False
-
-
-def toggleStartupBat(state: bool):
-    try:
-        startup_path = os.path.expanduser(
-            "~\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\"
-        )
-        logging.info(f"trying to toggle startup bat to {state}")
-        if state:
-            make_shortcut(
-                [PATH, startup_path, "edgeware"]
-            )  # i scream at my previous and current incompetence and poor programming
-            logging.info("toggled startup run on.")
-        else:
-            os.remove(os.path.join(startup_path, "edgeware.lnk"))
-            logging.info("toggled startup run off.")
-    except Exception as e:
-        errText = (
-            str(e)
-            .lower()
-            .replace(
-                os.environ["USERPROFILE"].lower().replace("\\", "\\\\"),
-                "[USERNAME_REDACTED]",
-            )
-        )
-        logging.warning(f"failed to toggle startup bat.\n\tReason: {errText}")
-        print("uwu")
 
 
 def assign(obj: StringVar or IntVar or BooleanVar, var: str or int or bool):
@@ -1872,9 +1814,7 @@ def getPresets() -> list[str]:
     presetFolderPath = os.path.join(PATH, "presets")
     if not os.path.exists(presetFolderPath):
         os.mkdir(presetFolderPath)
-    return (
-        os.listdir(presetFolderPath) if len(os.listdir(presetFolderPath)) > 0 else None
-    )
+    return os.listdir(presetFolderPath) if len(os.listdir(presetFolderPath)) > 0 else []
 
 
 def applyPreset(name: str):
@@ -1900,7 +1840,9 @@ def savePreset(name: str) -> bool:
                 os.path.join(PATH, "presets", f"{name.lower()}.cfg"), "rw"
             ) as file:
                 file_json = json.loads(file.readline())
-                file_json["drivePath"] = "C:/Users/"
+                file_json["drivePath"] = str(
+                    Path(os.path.expanduser("~")).parent.absolute()
+                )
                 file.write(json.dumps(file_json))
             return True
         return False

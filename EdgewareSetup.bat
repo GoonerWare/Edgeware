@@ -3,7 +3,7 @@
 color 5d
 echo +==============[ Welcome to Edgeware Setup~ ]==============+
 echo Python Version:
-py --version
+python --version
 if NOT %errorlevel%==0 goto pyInstall
 goto run
 :pyInstall
@@ -17,7 +17,7 @@ echo Please complete installation through the installer before continuing.
 start %CD%\pyinstaller.exe
 pause
 :verifyInstallation
-py --version
+python --version
 if NOT %errorlevel%==0 goto quit
 goto run
 :run
