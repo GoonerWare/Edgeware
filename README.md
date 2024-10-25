@@ -39,7 +39,11 @@ Download one of the premade packages listed below. Once it's downloaded (if usin
 
 Double click "EdgewareSetup.bat" and follow the instructions. It should check your Python version, and then automatically download the correct installer from python.org and run it. Once you finish with that installation, it will run start.pyw, which will walk through an automated first time setup. Once this setup is complete, it will provide you with the config window to select your settings, and then run! (The installations only need to be performed on the first run)
 
-   _**[Premade Packages]**_
+_**[Linux Notes]**_
+
+Please ensure that `Port Audio` is installed. This will typically be `libportaudio2' or 'libportaudio-dev`. On Ubuntu 24.04 you just need to `sudo apt install libportaudio2`. TODO: Confirm if this is not required if you use VLC to play back videos/audio instead.
+
+_**[Premade Packages]**_
 
 Can be found on the [original repo](https://github.com/PetitTournesol/Edgeware).
 

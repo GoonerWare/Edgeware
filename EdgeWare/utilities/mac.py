@@ -16,17 +16,28 @@ def expose_file(path: Path | str):
     if hidden_path.exists():
         hidden_path.rename(path)
 
-def shortcut_script(pth_str: str, startup_path: str, title: str):
-    print("Mac: Need to implement shortcut_script")
-    return True
+
+def create_shortcut_script(pth_str: str, startup_path: str, title: str):
+    print("Mac: Need to implement create_shortcut_script")
+    pass
 
 
 # uses the above script to create a shortcut on desktop with given specs
 def make_shortcut(tList: list) -> bool:
     print("Mac: Need to implement make_shortcut")
-    return True
+    pass
 
 
 def toggle_start_on_logon(path: Path, state: bool):
     print("Mac: Need to implement toggle_start_on_logon")
-    return True
+    pass
+
+
+def does_desktop_shortcut_exist(name: str):
+    print("Mac: Need to implement does_desktop_shortcut_exist")
+    pass
+
+
+def set_wallpaper(wallpaper_path: Path | str):
+    print("Mac: Need to implement set_wallpaper")
+    pass
