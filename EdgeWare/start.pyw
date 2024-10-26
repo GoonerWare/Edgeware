@@ -132,7 +132,7 @@ if int(settings.get("is_configed")) != 1:
     logging.info("reloading settings")
     load_settings()
 
-# check for pip_installed flag, if not installed run get-pip.pyw and then install pillow for popups
+# if pip_installed not set, check if it is. If not, exit
 if int(settings.get("pip_installed")) != 1:
     # Check if pip is installed
     try:
