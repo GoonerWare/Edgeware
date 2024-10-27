@@ -33,13 +33,27 @@ _**[How to Use]**_
 Start by downloading this repository as a zip, and then extracting it somewhere on your computer.
 
 (*If not using a premade package, skip this step.*)
-Download one of the premade packages listed below. Once it's downloaded (if using a premade package), place it into the Edgeware folder inside Edgeware-main.
+Download one of the premade packages listed below. Once it's downloaded (if using a premade package), place it into the EdgeWare folder inside Edgeware-multi-os.
 
-Double click "EdgewareSetup.bat" and follow the instructions. It should check your Python version, and then automatically download the correct installer from python.org and run it. Once you finish with that installation, it will run start.pyw, which will walk through an automated first time setup. Once this setup is complete, it will provide you with the config window to select your settings, and then run! (The installations only need to be performed on the first run)
+Once you finish the installation, it will automatically run start.pyw, which will walk through an automated first time setup. Once this setup is complete, it will provide you with the config window to select your settings, and then run! (The installations only need to be performed on the first run.) 
+
+Desktop shortcuts for Edgeware, Config & Panic are created across all OS, after install you can use these to start Edgeware.
+
+_**[Installation]**_
+
+Windows:
+- Double click `EdgewareSetup.bat` and follow the instructions. It should check your Python version, and then automatically download the correct installer from python.org if needed and run it. 
+
+Mac/Linux:
+- cd to the EdgeWare folder, `chmod +x setup.sh` then `./setup.sh` - see the Linux/Mac Notes below for important setup details.
 
 _**[Linux Notes]**_
 
-Please ensure that `Port Audio` is installed. This will typically be `libportaudio2' or 'libportaudio-dev`. On Ubuntu 24.04 you just need to `sudo apt install libportaudio2`. TODO: Confirm if this is not required if you use VLC to play back videos/audio instead.
+Please ensure that `Port Audio` is installed. This will typically be `libportaudio2` or `libportaudio-dev`. On Ubuntu 24.04 you just need to `sudo apt install libportaudio2`.
+
+_**[Mac Notes]**_
+
+The easiest way to get things up and running is to install [Homebrew](https://brew.sh/), you then can run `brew install python-tk` to install Python with tk support which is needed for this to run.
 
 _**[Premade Packages]**_
 
