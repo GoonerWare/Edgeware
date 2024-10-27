@@ -87,7 +87,7 @@ def make_shortcut(
                 shell=True,
             )
     except Exception as e:
-        print(f"could not chmod.\n\nReason: {e}")
+        print(f"Shortcut error.\n\nReason: {e}")
         return False
     return True
 

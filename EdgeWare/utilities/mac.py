@@ -57,7 +57,7 @@ def make_shortcut(
         desktop_file.write_text(shortcut_content, "UTF-8")
         os.chmod(desktop_file, 0o755)  # Need to make sure the shortcut is executable
     except Exception as e:
-        print(f"could not chmod.\n\nReason: {e}")
+        print(f"Shortcut error.\n\nReason: {e}")
         return False
     return True
 

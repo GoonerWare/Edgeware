@@ -1,4 +1,3 @@
-import ctypes
 import hashlib
 import json
 import logging
@@ -11,10 +10,10 @@ import time
 import tkinter as tk
 import webbrowser
 
-from itertools import count, cycle
+from itertools import cycle
 from PIL import Image, ImageTk, ImageFilter
 from screeninfo import get_monitors
-from tkinter import messagebox, simpledialog, Tk, Frame, Label, Button, RAISED
+from tkinter import simpledialog, Tk, Frame, Label, Button, RAISED
 from utilities import utilities
 
 SYS_ARGS = sys.argv.copy()
