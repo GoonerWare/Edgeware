@@ -7,9 +7,7 @@ If you get error "TypeError: unsupported operand type(s) for |: 'type' and 'type
 
 _**[Maintainer's Note]**_
 
-Hello! EdgewarePlusPlus is great, but has diverged enough from the original Edgeware following the rewrite that it should now be considered its own thing IMO. As great at it is, there are also some changes I am not a fan of and some outstanding bugs for things that I consider core functionality.
-
-The initial idea behind this fork is to update the original Edgeware project so that it supports modern versions of Python out of the box. Improved functionality that doesn't change the core design of the original Edgeware may also be brought in though it may diverge over time.
+Hello! EdgewarePlusPlus is great, but has diverged enough from the original Edgeware following the rewrite that it should now be considered its own thing IMO. The initial idea behind this fork is to update the original Edgeware project so that it supports modern versions of Python out of the box. Improved functionality that doesn't change the core design will also be brought in (e.g. supporting multiple OS).
 
 _**[Release Notes]**_
 

@@ -198,12 +198,11 @@ except:
     pip_install("playsound==1.2.2")
     import playsound
 
-if not utilities.DEPENDENCIES.FFMPEG in missing_dependencies:
-    try:
-        import videoprops
-    except:
-        logging.warning("failed to import videoprops module")
-        pip_install("get-video-properties")
+try:
+    import videoprops
+except:
+    logging.warning("failed to import videoprops module")
+    pip_install("get-video-properties")
 
 try:
     import imageio
@@ -217,14 +216,11 @@ except:
     logging.warning("failed to import moviepy module")
     pip_install("moviepy")
 
-if not utilities.DEPENDENCIES.PORT_AUDIO in missing_dependencies:
-    try:
-        import sounddevice
-    except:
-        logging.warning("failed to import sounddevice module")
-        pip_install("sounddevice")
-else:
-    logging.fatal("libportaudio2 must be installed for Edgeware to work on Linux")
+try:
+    import sounddevice
+except:
+    logging.warning("failed to import sounddevice module")
+    pip_install("sounddevice")
 
 try:
     from bs4 import BeautifulSoup
@@ -619,7 +615,7 @@ def main():
 
     # Should already be set at this point, but you know. Just to be sure.
     shutdown_event.set()
-    if utilities.is_linux():
+    if utilities.is_linux() or utilities.is_mac():
         os.killpg(os.getpgid(os.getpid()), signal.SIGTERM)
     elif utilities.is_windows():
         os.kill(os.getpid(), signal.SIGTERM)

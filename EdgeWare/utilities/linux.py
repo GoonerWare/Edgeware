@@ -80,9 +80,12 @@ def make_shortcut(
     desktop_file = Path(os.path.expanduser("~/Desktop")) / file_name
     try:
         desktop_file.write_text("\n".join(content), "UTF-8")
-        os.chmod(desktop_file, 0o755) # Need to make sure the shortcut is executable
+        os.chmod(desktop_file, 0o755)  # Need to make sure the shortcut is executable
         if get_desktop_environment() == "gnome":
-            subprocess.run(f'gio set "{str(desktop_file.absolute())}" metadata::trusted true', shell=True)
+            subprocess.run(
+                f'gio set "{str(desktop_file.absolute())}" metadata::trusted true',
+                shell=True,
+            )
     except Exception as e:
         print(f"could not chmod.\n\nReason: {e}")
         return False

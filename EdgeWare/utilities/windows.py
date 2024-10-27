@@ -63,7 +63,11 @@ def make_shortcut(
     startup_path: str | None = None,
 ) -> bool:
     success = False
-    with tempfile.NamedTemporaryFile("w", suffix=".bat", delete=False, ) as bat:
+    with tempfile.NamedTemporaryFile(
+        "w",
+        suffix=".bat",
+        delete=False,
+    ) as bat:
         bat.writelines(
             create_shortcut_script(path, icon, script, title, startup_path)
         )  # write built shortcut script text to temporary batch file
