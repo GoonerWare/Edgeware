@@ -75,7 +75,6 @@ def does_desktop_shortcut_exist(name: str):
 
 
 def set_wallpaper(wallpaper_path: Path | str):
-    global first_run
     if isinstance(wallpaper_path, Path):
         wallpaper_path = str(wallpaper_path.absolute())
 
@@ -88,9 +87,6 @@ end tell
 END"""
 
         subprocess.Popen(SCRIPT % wallpaper_path, shell=True)
-
-        if first_run:
-            first_run = False
         return True
     except:
         sys.stderr.write("ERROR: Failed to set wallpaper. There might be a bug.\n")
