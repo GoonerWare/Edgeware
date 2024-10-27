@@ -17,11 +17,6 @@ def expose_file(path: Path | str):
         hidden_path.rename(path)
 
 
-def create_shortcut_script(pth_str: str, startup_path: str, title: str):
-    print("Mac: Need to implement create_shortcut_script")
-    pass
-
-
 # uses the above script to create a shortcut on desktop with given specs
 def make_shortcut(
     path: Path,

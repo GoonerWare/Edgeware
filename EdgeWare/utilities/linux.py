@@ -3,8 +3,10 @@ from collections.abc import Callable
 import os
 from pathlib import Path
 import re
+import shlex
 import shutil
 import subprocess
+import sys
 from tkinter import messagebox
 from utilities.dependencies import DEPENDENCIES
 
@@ -25,21 +27,66 @@ def expose_file(path: Path | str):
         hidden_path.rename(path)
 
 
-def create_shortcut_script(pth_str: str, startup_path: str, title: str):
-    print("Linux: Need to implement create_shortcut_script")
-    pass
-
-
-# uses the above script to create a shortcut on desktop with given specs
 def make_shortcut(
     path: Path,
-    icon: str,
-    script: str,
+    icon: Path | str,
+    script_or_command: str | list[str],
     title: str | None = None,
-    startup_path: str | None = None,
+    file_name: str | None = None,
 ) -> bool:
-    print("Linux: Need to implement make_shortcut")
-    pass
+    if title is None:
+        if isinstance(script_or_command, str):
+            title = script_or_command
+        elif isinstance(icon, str):
+            title = icon
+        else:
+            title = icon.name.replace("_icon", "")
+
+    if isinstance(icon, str):
+        icon = path / "default_assets" / f"{icon}_icon.ico"
+
+    if file_name is None:
+        file_name = title
+
+    if isinstance(script_or_command, str):
+        script_path = str((path / f"{script_or_command}").absolute())
+        script_or_command = [sys.executable, script_path]
+
+    if title == "Edgeware":
+        # Terminal must be true, else panic causes OS crash on Ubuntu
+        content = [
+            "[Desktop Entry]",
+            f"Version=1.0",
+            f"Name={title}",
+            f"Exec={shlex.join(script_or_command)}",
+            f"Icon={str(icon.absolute())}",
+            "Terminal=true",
+            "Type=Application",
+            "Categories=Application;",
+        ]
+    else:
+        content = [
+            "[Desktop Entry]",
+            f"Version=1.0",
+            f"Name={title}",
+            f"Exec={shlex.join(script_or_command)}",
+            f"Icon={str(icon.absolute())}",
+            "Terminal=false",
+            "Type=Application",
+            "Categories=Application;",
+        ]
+
+    file_name = f"{file_name}.desktop"
+    desktop_file = Path(os.path.expanduser("~/Desktop")) / file_name
+    try:
+        desktop_file.write_text("\n".join(content), "UTF-8")
+        os.chmod(desktop_file, 0o755) # Need to make sure the shortcut is executable
+        if get_desktop_environment() == "gnome":
+            subprocess.run(f'gio set "{str(desktop_file.absolute())}" metadata::trusted true', shell=True)
+    except Exception as e:
+        print(f"could not chmod.\n\nReason: {e}")
+        return False
+    return True
 
 
 def toggle_start_on_logon(path: Path, state: bool):
@@ -48,8 +95,10 @@ def toggle_start_on_logon(path: Path, state: bool):
 
 
 def does_desktop_shortcut_exist(name: str):
-    print("Linux: Need to implement does_desktop_shortcut_exist")
-    pass
+    file = Path(name)
+    return Path(
+        os.path.expanduser("~/Desktop") / file.with_name(f"{file.name}.desktop")
+    ).exists()
 
 
 def set_wallpaper(wallpaper: Path) -> None:

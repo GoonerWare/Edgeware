@@ -17,10 +17,8 @@ except:
         utilities.hide_file(timeObjPath)
         # sudoku if timer after hiding file again
         os.kill(os.getpid(), 9)
-    else:
-        # continue if no timer
-        utilities.set_wallpaper(PATH / "defaut_assets" / "default_win10.jpg")
 
 
 with Client(ADDRESS, authkey=AUTH_KEY) as conn:
+    utilities.set_wallpaper(PATH / "default_assets" / "default_win10.jpg")
     conn.send("panic_close")
